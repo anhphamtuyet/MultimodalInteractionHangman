@@ -122,6 +122,8 @@ public class GameActivity extends ActionBarActivity {
         tried.setText(this.triedLetters);
         TextView score = (TextView) findViewById(R.id.scoreView);
         score.setText(Integer.toString(this.score));
+        EditText input = (EditText) findViewById(R.id.main_input);
+        input.setText("");
         HangmanCanvasView canvas = (HangmanCanvasView) findViewById(R.id.hangman_canvas_view);
         canvas.drawHangman(this.score);
 
