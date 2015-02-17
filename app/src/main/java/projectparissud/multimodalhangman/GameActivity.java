@@ -14,15 +14,29 @@ import android.media.MediaPlayer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import projectparissud.multimodalhangman.rdf.HangmanRDF;
+import projectparissud.multimodalhangman.rdf.HangmanRDFImpl;
+import projectparissud.multimodalhangman.scenario.Environment;
+import projectparissud.multimodalhangman.scenario.Handicap;
+import projectparissud.multimodalhangman.scenario.Modality;
+import projectparissud.multimodalhangman.scenario.Scenario;
+
 
 public class GameActivity extends ActionBarActivity {
+
     String wordToGuess;
     String guessed;
     String triedLetters = "";
     int score = 10;
+
+    // RDF related attributes
+    private HangmanRDF rdf;
+    private ArrayList<Modality> availableInputModalities;
+    private ArrayList<Modality> availableOutputModalities;
 
     public String initGuessed(){
         String result = "";
@@ -177,12 +191,28 @@ public class GameActivity extends ActionBarActivity {
         mp.start();
     }
 
+    private void getModalities() {
+        this.availableInputModalities = this.rdf.getAvailableInputModalities();
+        this.availableOutputModalities = this.rdf.getAvailableOutputModalities();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         this.wordToGuess = this.chooseRandomWord();
         this.guessed = this.initGuessed();
+
+        // get available modalities
+        this.rdf = new HangmanRDFImpl("rdf/hangman.rdf", "rdf/currentScenario.rdf", this.getAssets());
+        this.getModalities();
+
+        System.out.println("Scenario: " + this.rdf.getCurrentScenario().getHandicap() + " & " +
+                this.rdf.getCurrentScenario().getEnvironment());
+        System.out.print("Available Input Modalities: ");
+        System.out.println(availableInputModalities);
+        System.out.print("Available Output Modalities: ");
+        System.out.println(availableOutputModalities);
     }
 
 

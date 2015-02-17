@@ -1,0 +1,171 @@
+<?xml version="1.0"?>
+<rdf:RDF 
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:imi="http://intelligent-multimodal-interaction.org/relations/"
+  xml:base="http://intelligent-multimodal-interaction.org/concepts/">
+  
+<!-- TIP : use the RDF validator at http://www.w3.org/RDF/Validator/ -->
+
+  <!-- Modalities -->
+
+  <rdf:Description rdf:about="InputModality">
+    <rdf:type rdf:resource="Modality"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="OutputModality">
+    <rdf:type rdf:resource="Modality"/>
+  </rdf:Description>
+
+  <!-- Modes -->
+
+  <rdf:Description rdf:about="Sound">
+    <rdf:type rdf:resource="Mode"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Visual">
+    <rdf:type rdf:resource="Mode"/>
+  </rdf:Description>
+  
+  <rdf:Description rdf:about="Haptic">
+    <rdf:type rdf:resource="Mode"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Touch">
+    <rdf:type rdf:resource="Haptic"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Movement">
+    <rdf:type rdf:resource="Haptic"/>
+  </rdf:Description>
+
+  <!-- Input Modalities -->  
+
+  <rdf:Description rdf:about="SpeechRecognition">
+    <rdf:type rdf:resource="InputModality"/>
+    <imi:mode rdf:resource="Sound"/>
+    <imi:constraint-value>low</imi:constraint-value>
+  </rdf:Description> 
+
+  <rdf:Description rdf:about="Drawing">
+    <rdf:type rdf:resource="InputModality"/>
+    <imi:mode rdf:resource="Touch"/>
+    <imi:mode rdf:resource="Visual"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Keyboard">
+    <rdf:type rdf:resource="InputModality"/>
+    <imi:mode rdf:resource="Touch"/>
+    <imi:mode rdf:resource="Visual"/>
+  </rdf:Description>
+
+  <!-- Output Modalities --> 
+
+  <rdf:Description rdf:about="SpeechSynthesizer">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Sound"/>
+    <imi:constraint-value>high</imi:constraint-value>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Text">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Visual"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Earcon">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Sound"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Music">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Sound"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Vibration">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Movement"/>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Picture">
+    <rdf:type rdf:resource="OutputModality"/>
+    <imi:mode rdf:resource="Visual"/>
+  </rdf:Description>
+
+  <!-- Environments -->
+
+  <rdf:Description rdf:about="Quiet">
+    <rdf:type rdf:resource="Environment"/>
+    <!-- If the environment is quiet, you don't want to disturb it with loud sounds -->
+    <imi:constraint>
+      <rdf:Description>
+        <imi:mode rdf:resource="Sound"/>
+        <imi:constraint-value>low</imi:constraint-value>
+      </rdf:Description>
+    </imi:constraint>
+  </rdf:Description>  
+
+  <rdf:Description rdf:about="Noisy">
+    <rdf:type rdf:resource="Environment"/>
+    <!-- If there is an ambiant noise, you need to be able to hear the sound -->
+  	<imi:constraint>
+  	  <rdf:Description>
+        <imi:mode rdf:resource="Sound"/>
+    		<imi:constraint-value>high</imi:constraint-value>
+  	  </rdf:Description>
+  	</imi:constraint>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Ski">
+    <rdf:type rdf:resource="Environment"/>
+    <!-- You can't touch the screen when it's cold because of the gloves -->
+  	<imi:constraint>
+  	  <rdf:Description>
+    		<imi:mode rdf:resource="Touch"/>
+    		<imi:constraint-value>none</imi:constraint-value>
+  	  </rdf:Description>
+  	</imi:constraint>  
+  </rdf:Description>  
+
+  <!-- Handicaps -->
+
+  <rdf:Description rdf:about="Blind">
+    <rdf:type rdf:resource="Handicap"/>
+    <!-- Disable all modalities based on Visual mode -->
+  	<imi:constraint>
+      <rdf:Description>
+        <imi:mode rdf:resource="Visual" />
+        <imi:constraint-value>none</imi:constraint-value>
+      </rdf:Description>
+  	</imi:constraint>
+  </rdf:Description>
+
+  <rdf:Description rdf:about="Deaf">
+    <rdf:type rdf:resource="Handicap"/>
+    <!-- Disable all modalities based on Sound mode -->
+  	<imi:constraint>
+      <rdf:Description>
+        <imi:mode rdf:resource="Sound" />
+        <imi:constraint-value>none</imi:constraint-value>
+      </rdf:Description>
+    </imi:constraint>
+  </rdf:Description>   
+
+  <rdf:Description rdf:about="Armless">
+    <rdf:type rdf:resource="Handicap"/>
+     <!-- Disable all modalities based on Touch or Movement mode -->
+  	<imi:constraint>
+      <rdf:Description>
+        <imi:mode rdf:resource="Touch" />
+        <imi:constraint-value>none</imi:constraint-value>
+      </rdf:Description>
+    </imi:constraint>
+    <imi:constraint>
+      <rdf:Description>
+        <imi:mode rdf:resource="Movement" />
+        <imi:constraint-value>none</imi:constraint-value>
+      </rdf:Description>
+    </imi:constraint>
+  </rdf:Description>
+
+</rdf:RDF>
+  
