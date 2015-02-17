@@ -8,14 +8,56 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.content.res.AssetManager;
+import android.os.Vibrator;
+import android.media.MediaPlayer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Random;
+import java.util.Scanner;
 
 
 public class GameActivity extends ActionBarActivity {
-    // TODO : allow the user to provide its own word OR use a random word in a dictionnary
-    String wordToGuess = "SUPERMAN";
-    String guessed = "________";
+    String wordToGuess;
+    String guessed;
     String triedLetters = "";
     int score = 10;
+
+    public String initGuessed(){
+        String result = "";
+        for(int i = 0; i < this.wordToGuess.length(); i++){
+            result += "_";
+        }
+        return result;
+    }
+
+    /**
+     * Function extracting a random word from the built-in dictionary
+     * @return A string matching the chosen word
+     */
+    public String chooseRandomWord(){
+        String result = "";
+        AssetManager am = this.getAssets();
+        InputStream is;
+        try {
+            is = am.open("english-words.txt");
+            // The dictionary is quite big, we implement a reservoir sampling to extract one line
+            Random rand = new Random();
+            int n = 0;
+            for(Scanner sc = new Scanner(is); sc.hasNext(); )
+            {
+                ++n;
+                String line = sc.nextLine();
+                if(rand.nextInt(n) == 0)
+                    result = line;
+            }
+            return result.toUpperCase();
+        } catch (IOException e) {
+            Toast.makeText(this, "Error : unable to open dictionary", Toast.LENGTH_LONG);
+            return null;
+        }
+    }
 
     /**
      * A function to check if the letter sent by the user has already been tried before
@@ -44,9 +86,9 @@ public class GameActivity extends ActionBarActivity {
             boolean found = false;
             char[] guessedChars = this.guessed.toCharArray();
             for (int i = 0; i < wordToGuess.length(); i++) {
-                if (this.wordToGuess.charAt(i) == letter) {
+                if (Character.toLowerCase(this.wordToGuess.charAt(i)) == Character.toLowerCase(letter)) {
                     found = true;
-                    guessedChars[i] = letter;
+                    guessedChars[i] = Character.toUpperCase(letter);
                 }
             }
             this.guessed = String.valueOf(guessedChars);
@@ -56,35 +98,91 @@ public class GameActivity extends ActionBarActivity {
                 this.score--;
             }
 
-            this.updateView();
-
-            if(this.guessed.equals(this.wordToGuess)){
-                Toast.makeText(this, "You won !", Toast.LENGTH_LONG).show();
-            }
+            this.updateView(found);
         }
     }
 
     /**
      * The function called to update the view after modifying the letters tried, the current state of the word and the number of tries
+     * @param found Boolean to indicate if the letter in input was found
      */
-    public void updateView(){
+    public void updateView(boolean found){
         TextView output = (TextView) findViewById(R.id.bigTextView);
-        output.setText(this.guessed);
+        // We add dots between each underscore to allow the user to count the letters
+        String guessedOutput = "";
+        for(int i = 0; i < this.guessed.length() - 1; i++){
+            guessedOutput += this.guessed.charAt(i) + ".";
+        }
+        guessedOutput += this.guessed.charAt(this.guessed.length() - 1);
+        output.setText(guessedOutput);
         TextView tried = (TextView) findViewById(R.id.triedLettersView);
         tried.setText(this.triedLetters);
         TextView score = (TextView) findViewById(R.id.scoreView);
         score.setText(Integer.toString(this.score));
         HangmanCanvasView canvas = (HangmanCanvasView) findViewById(R.id.hangman_canvas_view);
         canvas.drawHangman(this.score);
-        if(this.score == 0){
+
+        boolean lost = this.score == 0;
+        if(lost){
             Toast.makeText(this, "You lost !", Toast.LENGTH_SHORT).show();
+            output.setText(this.wordToGuess);
         }
+
+        boolean won = this.guessed.equals(this.wordToGuess);
+        if(won){
+            Toast.makeText(this, "You won !", Toast.LENGTH_LONG).show();
+        }
+
+        this.vibrate(won, lost, found);
+        this.playAudio(won, lost, found);
+    }
+
+    public void vibrate(boolean won, boolean lost, boolean found){
+        Vibrator vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+        if(won) {
+            // Vibrate one time 1s
+            vibrator.vibrate(1000);
+        } else if (lost) {
+            // Vibrate three times 500ms
+            long[] pattern = {0, 500, 200, 500, 200, 500};
+            vibrator.vibrate(pattern, -1);
+        } else if (found) {
+            // Letter was found, vibrate 200ms
+            vibrator.vibrate(200);
+        } else {
+            // Not found, vibrate two times 200ms
+            long[] pattern = {0, 200, 200, 200};
+            vibrator.vibrate(pattern, -1);
+        }
+    }
+    
+    public void playAudio(boolean won, boolean lost, boolean found){
+        int sound;
+        if(won) {
+            sound = R.raw.win;
+        } else if (lost) {
+            sound = R.raw.lost;
+        } else if (found) {
+            sound = R.raw.found;
+        } else { // Not found
+            sound = R.raw.notfound;
+        }
+        MediaPlayer mp = MediaPlayer.create(this, sound);
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.release();
+            }
+        });
+        mp.start();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+        this.wordToGuess = this.chooseRandomWord();
+        this.guessed = this.initGuessed();
     }
 
 
@@ -112,27 +210,34 @@ public class GameActivity extends ActionBarActivity {
 
     /**
      * A function to check the letter sent by the user when he/she validates it by clicking the button
-     * If there are more than one character, we take the first one
-     * @param view
+     * @param view The current view
      */
     public void onClick(View view){
         EditText input = (EditText) findViewById(R.id.main_input);
         String string = input.getText().toString();
-        this.CheckLetter(string.charAt(0));
+        if(string.length() != 1){
+            Toast.makeText(this, "Enter one letter", Toast.LENGTH_LONG);
+            return;
+        }
+        char letter = string.charAt(0);
+        if (Character.isLetter(letter)) {
+            this.CheckLetter(letter);
+        } else {
+            Toast.makeText(this, "You have to input a valid letter (a-z)", Toast.LENGTH_LONG);
+        }
     }
 
     /**
      * A function to reset the view when the user clicks on the reset button
      * It clears the word to guess, the score and the letters already tried
-     * @param view
+     * @param view The current view
      */
     public void onClear(View view){
-        for(int i = 0; i < this.wordToGuess.length(); i++){
-            this.guessed = "__________";
-        }
+        this.wordToGuess = this.chooseRandomWord();
+        this.guessed = this.initGuessed();
         this.triedLetters = "";
         this.score = 10;
 
-        this.updateView();
+        this.updateView(false);
     }
 }
