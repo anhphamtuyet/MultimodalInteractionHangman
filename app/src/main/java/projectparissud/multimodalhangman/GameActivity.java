@@ -82,7 +82,7 @@ public class GameActivity extends ActionBarActivity {
         int i = 0;
         boolean result = false;
         while(!result && i < triedLetters.length()) {
-            result = triedLetters.charAt(i) == letter;
+            result = Character.toLowerCase(triedLetters.charAt(i)) == Character.toLowerCase(letter);
             i++;
         }
         return result;
@@ -95,7 +95,8 @@ public class GameActivity extends ActionBarActivity {
      */
     // Function confronting the letter in input against the word
     public void CheckLetter(char letter){
-        if(!this.hasTried(letter) && score > 0) {
+        boolean tried = this.hasTried(letter);
+        if(!tried && score > 0) {
             this.triedLetters += letter;
             boolean found = false;
             char[] guessedChars = this.guessed.toCharArray();
@@ -108,11 +109,13 @@ public class GameActivity extends ActionBarActivity {
             this.guessed = String.valueOf(guessedChars);
 
             // If the letter was not found in the word, decrease the score
-            if(!found){
+            if (!found) {
                 this.score--;
             }
 
             this.updateView(found);
+        } else if(tried) {
+            Toast.makeText(this, "You already tried this letter", Toast.LENGTH_LONG);
         }
     }
 
@@ -133,6 +136,8 @@ public class GameActivity extends ActionBarActivity {
         tried.setText(this.triedLetters);
         TextView score = (TextView) findViewById(R.id.scoreView);
         score.setText(Integer.toString(this.score));
+        EditText input = (EditText) findViewById(R.id.main_input);
+        input.setText("");
         HangmanCanvasView canvas = (HangmanCanvasView) findViewById(R.id.hangman_canvas_view);
         canvas.drawHangman(this.score);
 
