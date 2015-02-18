@@ -6,7 +6,6 @@
 /build
 /Key
 /*.log
-/build.gradle
 /gradle.properties
 /gradlew
 /gradlew.bat

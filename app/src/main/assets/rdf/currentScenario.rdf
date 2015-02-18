@@ -10,7 +10,7 @@
 	xmlns:fn="http://www.w3.org/2005/xpath-functions#">
 
 <rdf:Description rdf:about="http://intelligent-multimodal-interaction.org/concepts/CurrentScenario">
-	<imi:currentHandicap rdf:resource="http://intelligent-multimodal-interaction.org/concepts/Blind"/>
+	<imi:currentHandicap rdf:resource="http://intelligent-multimodal-interaction.org/concepts/Ordinary"/>
 	<imi:currentEnvironment rdf:resource="http://intelligent-multimodal-interaction.org/concepts/Quiet"/>
 </rdf:Description>
 

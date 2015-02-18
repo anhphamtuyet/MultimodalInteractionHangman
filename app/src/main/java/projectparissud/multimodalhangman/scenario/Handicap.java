@@ -7,6 +7,7 @@ package projectparissud.multimodalhangman.scenario;
  *
  */
 public enum Handicap {
+    ORDINARY ("Ordinary"),
     BLIND ("Blind"),
     DEAF ("Deaf"),
     ARMLESS ("Armless"),

@@ -1,5 +1,6 @@
 package projectparissud.multimodalhangman;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -157,43 +158,47 @@ public class GameActivity extends ActionBarActivity {
     }
 
     public void vibrate(boolean won, boolean lost, boolean found){
-        Vibrator vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
-        if(won) {
-            // Vibrate one time 1s
-            vibrator.vibrate(1000);
-        } else if (lost) {
-            // Vibrate three times 500ms
-            long[] pattern = {0, 500, 200, 500, 200, 500};
-            vibrator.vibrate(pattern, -1);
-        } else if (found) {
-            // Letter was found, vibrate 200ms
-            vibrator.vibrate(200);
-        } else {
-            // Not found, vibrate two times 200ms
-            long[] pattern = {0, 200, 200, 200};
-            vibrator.vibrate(pattern, -1);
+        if (this.availableOutputModalities.contains(Modality.VIBRATION)) {
+            Vibrator vibrator = (Vibrator) this.getSystemService(VIBRATOR_SERVICE);
+            if (won) {
+                // Vibrate one time 1s
+                vibrator.vibrate(1000);
+            } else if (lost) {
+                // Vibrate three times 500ms
+                long[] pattern = {0, 500, 200, 500, 200, 500};
+                vibrator.vibrate(pattern, -1);
+            } else if (found) {
+                // Letter was found, vibrate 200ms
+                vibrator.vibrate(200);
+            } else {
+                // Not found, vibrate two times 200ms
+                long[] pattern = {0, 200, 200, 200};
+                vibrator.vibrate(pattern, -1);
+            }
         }
     }
     
     public void playAudio(boolean won, boolean lost, boolean found){
-        int sound;
-        if(won) {
-            sound = R.raw.win;
-        } else if (lost) {
-            sound = R.raw.lost;
-        } else if (found) {
-            sound = R.raw.found;
-        } else { // Not found
-            sound = R.raw.notfound;
-        }
-        MediaPlayer mp = MediaPlayer.create(this, sound);
-        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                mp.release();
+        if (this.availableOutputModalities.contains(Modality.EARCON)) {
+            int sound;
+            if (won) {
+                sound = R.raw.win;
+            } else if (lost) {
+                sound = R.raw.lost;
+            } else if (found) {
+                sound = R.raw.found;
+            } else { // Not found
+                sound = R.raw.notfound;
             }
-        });
-        mp.start();
+            MediaPlayer mp = MediaPlayer.create(this, sound);
+            mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mp.release();
+                }
+            });
+            mp.start();
+        }
     }
 
     private void getModalities() {
@@ -208,8 +213,13 @@ public class GameActivity extends ActionBarActivity {
         this.wordToGuess = this.chooseRandomWord();
         this.guessed = this.initGuessed();
 
+        Intent intent = getIntent();
+
         // get available modalities
+
         this.rdf = new HangmanRDFImpl("rdf/hangman.rdf", "rdf/currentScenario.rdf", this.getAssets());
+        this.rdf.setCurrentScenario(new Scenario(Handicap.stringToHandicap(intent.getStringExtra("handicap")),
+                                                    Environment.stringToEnvironment(intent.getStringExtra("environment"))));
         this.getModalities();
 
         System.out.println("Scenario: " + this.rdf.getCurrentScenario().getHandicap() + " & " +

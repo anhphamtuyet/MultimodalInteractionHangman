@@ -128,6 +128,11 @@
 
   <!-- Handicaps -->
 
+  <rdf:Description rdf:about="Ordinary">
+    <rdf:type rdf:resource="Handicap"/>
+    <!-- no constraints -->
+  </rdf:Description>
+
   <rdf:Description rdf:about="Blind">
     <rdf:type rdf:resource="Handicap"/>
     <!-- Disable all modalities based on Visual mode -->
