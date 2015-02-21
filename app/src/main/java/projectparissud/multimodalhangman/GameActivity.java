@@ -12,12 +12,15 @@ import android.widget.Toast;
 import android.content.res.AssetManager;
 import android.os.Vibrator;
 import android.media.MediaPlayer;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Locale;
 
 import projectparissud.multimodalhangman.rdf.HangmanRDF;
 import projectparissud.multimodalhangman.rdf.HangmanRDFImpl;
@@ -27,7 +30,7 @@ import projectparissud.multimodalhangman.scenario.Modality;
 import projectparissud.multimodalhangman.scenario.Scenario;
 
 
-public class GameActivity extends ActionBarActivity {
+public class GameActivity extends ActionBarActivity implements OnInitListener {
 
     String wordToGuess;
     String guessed;
@@ -38,6 +41,9 @@ public class GameActivity extends ActionBarActivity {
     private HangmanRDF rdf;
     private ArrayList<Modality> availableInputModalities;
     private ArrayList<Modality> availableOutputModalities;
+
+    // TextToSpeech Engine
+    private TextToSpeech gameTTS;
 
     public String initGuessed(){
         String result = "";
@@ -190,20 +196,45 @@ public class GameActivity extends ActionBarActivity {
             } else { // Not found
                 sound = R.raw.notfound;
             }
+            final boolean speechWon = won;
+            final boolean speechLost = lost;
             MediaPlayer mp = MediaPlayer.create(this, sound);
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     mp.release();
+                    playTTS(speechWon, speechLost);
                 }
             });
             mp.start();
         }
     }
 
+    public void playTTS(boolean won, boolean lost){
+        if (this.availableOutputModalities.contains(Modality.SPEECH_SYNTHESIZER)) {
+            if (won || lost) {
+                this.gameTTS.speak(this.wordToGuess, TextToSpeech.QUEUE_FLUSH, null);
+            } else {
+                for(int i = 0; i < this.guessed.length(); i++){
+                    char character = this.guessed.charAt(i);
+                    if(character == '_') {
+                        this.gameTTS.speak("Unknown", TextToSpeech.QUEUE_ADD, null);
+                    } else {
+                        System.out.println(character);
+                        this.gameTTS.speak(this.wordToGuess.charAt(i) + "", TextToSpeech.QUEUE_ADD, null);
+                    }
+                }
+            }
+        }
+    }
+
     private void getModalities() {
         this.availableInputModalities = this.rdf.getAvailableInputModalities();
         this.availableOutputModalities = this.rdf.getAvailableOutputModalities();
+    }
+
+    private void spellWord(String word){
+
     }
 
     @Override
@@ -228,8 +259,30 @@ public class GameActivity extends ActionBarActivity {
         System.out.println(availableInputModalities);
         System.out.print("Available Output Modalities: ");
         System.out.println(availableOutputModalities);
+
+        Intent checkTTSIntent = new Intent();
+        checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkTTSIntent, 0);
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                gameTTS = new TextToSpeech(this, this);
+            }
+            else {
+                Intent installTTSIntent = new Intent();
+                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installTTSIntent);
+            }
+        }
+    }
+
+    public void onInit(int initStatus) {
+        if (initStatus == TextToSpeech.SUCCESS) {
+            gameTTS.setLanguage(Locale.US);
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

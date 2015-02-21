@@ -84,13 +84,13 @@
     <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.3" level="project" />
-    <orderEntry type="library" exported="" name="slf4j-api-1.7.6" level="project" />
     <orderEntry type="library" exported="" name="logback-classic-1.1.2" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
-    <orderEntry type="library" exported="" name="openrdf-sesame-2.7.14-onejar" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="logback-core-1.1.2" level="project" />
+    <orderEntry type="library" exported="" name="openrdf-sesame-2.7.14-onejar" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-21.0.3" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-21.0.3" level="project" />
+    <orderEntry type="library" exported="" name="slf4j-api-1.7.6" level="project" />
   </component>
 </module>
 
