@@ -5,9 +5,11 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.view.View;;
+import android.view.KeyEvent;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.content.res.AssetManager;
 import android.os.Vibrator;
@@ -211,7 +213,7 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
     }
 
     public void playTTS(boolean won, boolean lost){
-        if (this.availableOutputModalities.contains(Modality.SPEECH_SYNTHESIZER)) {
+        if (this.gameTTS != null && this.availableOutputModalities.contains(Modality.SPEECH_SYNTHESIZER)) {
             if (won || lost) {
                 this.gameTTS.speak(this.wordToGuess, TextToSpeech.QUEUE_FLUSH, null);
             } else {
@@ -247,7 +249,6 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
         Intent intent = getIntent();
 
         // get available modalities
-
         this.rdf = new HangmanRDFImpl("rdf/hangman.rdf", "rdf/currentScenario.rdf", this.getAssets());
         this.rdf.setCurrentScenario(new Scenario(Handicap.stringToHandicap(intent.getStringExtra("handicap")),
                                                     Environment.stringToEnvironment(intent.getStringExtra("environment"))));
@@ -271,17 +272,26 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
                 gameTTS = new TextToSpeech(this, this);
             }
             else {
-                Intent installTTSIntent = new Intent();
-                installTTSIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
-                startActivity(installTTSIntent);
+                gameTTS = null;
             }
         }
     }
 
     public void onInit(int initStatus) {
-        if (initStatus == TextToSpeech.SUCCESS) {
-            gameTTS.setLanguage(Locale.US);
+        if (gameTTS != null && initStatus == TextToSpeech.SUCCESS) {
+            if(gameTTS.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE){
+                gameTTS.setLanguage(Locale.US);
+            }
         }
+    }
+
+    @Override
+    public void onDestroy(){
+        if (gameTTS != null) {
+            gameTTS.stop();
+            gameTTS.shutdown();
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -314,14 +324,14 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
         EditText input = (EditText) findViewById(R.id.main_input);
         String string = input.getText().toString();
         if(string.length() != 1){
-            Toast.makeText(this, "Enter one letter", Toast.LENGTH_LONG);
+            Toast.makeText(view.getContext(), "Enter one letter", Toast.LENGTH_LONG);
             return;
         }
         char letter = string.charAt(0);
         if (Character.isLetter(letter)) {
             this.CheckLetter(letter);
         } else {
-            Toast.makeText(this, "You have to input a valid letter (a-z)", Toast.LENGTH_LONG);
+            Toast.makeText(view.getContext(), "You have to input a valid letter (a-z)", Toast.LENGTH_LONG);
         }
     }
 
