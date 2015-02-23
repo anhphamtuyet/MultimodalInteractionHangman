@@ -32,7 +32,8 @@ public class StartActivity extends ActionBarActivity {
         adapterHandicap.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         for (Handicap handicap : Handicap.values()) {
-            adapterHandicap.add(Handicap.handicapToString(handicap));
+            if (handicap != Handicap.UNKNOWN)
+                adapterHandicap.add(Handicap.handicapToString(handicap));
         }
 
         spinnerHandicap = (Spinner) findViewById(R.id.handicap_spinner);
@@ -44,7 +45,8 @@ public class StartActivity extends ActionBarActivity {
         adapterEnvironment.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         for (Environment environment : Environment.values()) {
-            adapterEnvironment.add(Environment.environmentToString(environment));
+            if (environment != Environment.UNKNOWN)
+                adapterEnvironment.add(Environment.environmentToString(environment));
         }
 
         spinnerEnvironment = (Spinner) findViewById(R.id.environment_spinner);

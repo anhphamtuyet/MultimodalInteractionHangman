@@ -204,6 +204,28 @@ public class HangmanRDFImpl implements HangmanRDF {
                         "?handicapConstraint imi:constraint-value 'none'. " +
                         "?modality imi:mode ?disabledMode. " +
                         "} " +
+                        "MINUS {" +
+                        "base:CurrentScenario imi:currentHandicap ?handicap. " +
+                        "base:CurrentScenario imi:currentEnvironment ?environment. " +
+                        "?environment imi:constraint ?environmentConstraint. " +
+                        "?environmentConstraint imi:mode ?disabledMode. " +
+                        "?environmentConstraint imi:constraint-value 'none'. " +
+                        "?modality imi:mode ?disabledMode. " +
+                        "} " +
+                        "MINUS {" +
+                        "base:CurrentScenario imi:currentHandicap ?handicap. " +
+                        "base:CurrentScenario imi:currentEnvironment ?environment. " +
+                        "?handicap imi:constraint ?handicapConstraint. " +
+                        "?handicapConstraint imi:modality ?modality. " +
+                        "?handicapConstraint imi:constraint-value 'none'. " +
+                        "} " +
+                        "MINUS {" +
+                        "base:CurrentScenario imi:currentHandicap ?handicap. " +
+                        "base:CurrentScenario imi:currentEnvironment ?environment. " +
+                        "?environment imi:constraint ?environmentConstraint. " +
+                        "?environmentConstraint imi:modality ?modality. " +
+                        "?environmentConstraint imi:constraint-value 'none'. " +
+                        "} " +
                         "}";
                 TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
                 TupleQueryResult result = tupleQuery.evaluate();

@@ -5,5 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_start">StartActivity</string>
+    <string name="speech_prompt">Please say the letter.</string>
+    <string name="speech_not_supported">Speech Recognition is not supported by your device.</string>
 
 </resources>

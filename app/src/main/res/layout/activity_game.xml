@@ -21,25 +21,32 @@
         android:id="@+id/bigTextView"
         android:layout_below="@+id/scoreView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="29dp" />
+        android:layout_marginTop="20dp" />
 
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/main_input"
-        android:layout_marginBottom="86dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:background="#00000000"
+        android:cursorVisible="false"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:width="0dp"
+        android:height="0dp" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="onClick"
-        android:text="Validate"
+        android:text="Guess"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:background="@color/accent_material_light"
+        android:textColor="#ffffff"
+        android:layout_alignTop="@+id/button2" />
 
     <Button
         android:id="@+id/button2"
@@ -49,7 +56,8 @@
         android:text="Reset"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:background="@color/switch_thumb_normal_material_dark" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -74,7 +82,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:layout_above="@+id/button1"
-        android:layout_below="@+id/triedLettersView" />
+        android:layout_below="@+id/bigTextView"
+        android:layout_above="@+id/button1" />
 
 </RelativeLayout>

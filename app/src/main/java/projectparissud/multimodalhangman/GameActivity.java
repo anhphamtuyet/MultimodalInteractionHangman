@@ -1,15 +1,21 @@
 package projectparissud.multimodalhangman;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.text.method.KeyListener;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;;
-import android.view.KeyEvent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 import android.content.res.AssetManager;
 import android.os.Vibrator;
@@ -33,6 +39,9 @@ import projectparissud.multimodalhangman.scenario.Scenario;
 
 
 public class GameActivity extends ActionBarActivity implements OnInitListener {
+
+    private static final int REQ_CODE_SPEECH_SYNTHESIS = 100;
+    private static final int REQ_CODE_SPEECH_RECOGNITION = 200;
 
     String wordToGuess;
     String guessed;
@@ -263,23 +272,41 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
 
         Intent checkTTSIntent = new Intent();
         checkTTSIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
-        startActivityForResult(checkTTSIntent, 0);
-    }
+        startActivityForResult(checkTTSIntent, REQ_CODE_SPEECH_SYNTHESIS);
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 0) {
-            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
-                gameTTS = new TextToSpeech(this, this);
+        // watch for changes in the input
+        EditText input = (EditText) findViewById(R.id.main_input);
+        input.addTextChangedListener(new TextWatcher() {
+
+            private EditText input = (EditText) findViewById(R.id.main_input);
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
-            else {
-                gameTTS = null;
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (s.length() > 0) {
+                    if (Character.isLetter(s.charAt(0))) {
+                        CheckLetter(s.charAt(0));
+                    } else {
+                        Toast.makeText(getApplicationContext(), "You have to input a valid letter (a-z)", Toast.LENGTH_LONG);
+                    }
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+                }
             }
-        }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                s.clear();
+            }
+        });
     }
 
     public void onInit(int initStatus) {
         if (gameTTS != null && initStatus == TextToSpeech.SUCCESS) {
-            if(gameTTS.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE){
+            if (gameTTS.isLanguageAvailable(Locale.US) == TextToSpeech.LANG_AVAILABLE) {
                 gameTTS.setLanguage(Locale.US);
             }
         }
@@ -317,21 +344,39 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
     }
 
     /**
-     * A function to check the letter sent by the user when he/she validates it by clicking the button
+     * A function guess a letter.
+     * It chooses the appropriate input modality, based on the available
+     * input modalities.
      * @param view The current view
      */
     public void onClick(View view){
-        EditText input = (EditText) findViewById(R.id.main_input);
-        String string = input.getText().toString();
-        if(string.length() != 1){
-            Toast.makeText(view.getContext(), "Enter one letter", Toast.LENGTH_LONG);
-            return;
-        }
-        char letter = string.charAt(0);
-        if (Character.isLetter(letter)) {
-            this.CheckLetter(letter);
+        if (!this.guessed.equals(this.wordToGuess) && this.score > 0) {
+            EditText input = (EditText) findViewById(R.id.main_input);
+
+            if (this.availableInputModalities.contains(Modality.KEYBOARD)) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+
+            } else if (this.availableInputModalities.contains(Modality.SPEECH_RECOGNITION)) {
+
+                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+                intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                        getString(R.string.speech_prompt));
+                try {
+                    startActivityForResult(intent, REQ_CODE_SPEECH_RECOGNITION);
+                } catch (ActivityNotFoundException a) {
+                    Toast.makeText(getApplicationContext(),
+                            getString(R.string.speech_not_supported),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
         } else {
-            Toast.makeText(view.getContext(), "You have to input a valid letter (a-z)", Toast.LENGTH_LONG);
+            Toast.makeText(getApplicationContext(), "Game already finished. Tap the RESET button to start another game.",
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -347,5 +392,36 @@ public class GameActivity extends ActionBarActivity implements OnInitListener {
         this.score = 10;
 
         this.updateView(false);
+    }
+
+    /**
+     * Receiving speech input
+     * */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_RECOGNITION: {
+                if (resultCode == RESULT_OK && null != data) {
+                    EditText input = (EditText) findViewById(R.id.main_input);
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    input.setText(result.get(0));
+                }
+                break;
+            }
+            case REQ_CODE_SPEECH_SYNTHESIS: {
+                if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                    gameTTS = new TextToSpeech(this, this);
+                }
+                else {
+                    gameTTS = null;
+                }
+                break;
+            }
+
+        }
     }
 }

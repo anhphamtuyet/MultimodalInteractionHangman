@@ -99,20 +99,13 @@
     <imi:constraint>
       <rdf:Description>
         <imi:mode rdf:resource="Sound"/>
-        <imi:constraint-value>low</imi:constraint-value>
+        <imi:constraint-value>none</imi:constraint-value>
       </rdf:Description>
     </imi:constraint>
   </rdf:Description>  
 
   <rdf:Description rdf:about="Noisy">
     <rdf:type rdf:resource="Environment"/>
-    <!-- If there is an ambiant noise, you need to be able to hear the sound -->
-  	<imi:constraint>
-  	  <rdf:Description>
-        <imi:mode rdf:resource="Sound"/>
-    		<imi:constraint-value>high</imi:constraint-value>
-  	  </rdf:Description>
-  	</imi:constraint>
   </rdf:Description>
 
   <rdf:Description rdf:about="Ski">
@@ -128,9 +121,15 @@
 
   <!-- Handicaps -->
 
-  <rdf:Description rdf:about="Ordinary">
+  <rdf:Description rdf:about="None">
     <rdf:type rdf:resource="Handicap"/>
     <!-- no constraints -->
+    <imi:constraint>
+      <rdf:Description>
+        <imi:modality rdf:resource="SpeechSynthesizer" />
+        <imi:constraint-value>none</imi:constraint-value>
+      </rdf:Description>
+    </imi:constraint>
   </rdf:Description>
 
   <rdf:Description rdf:about="Blind">
